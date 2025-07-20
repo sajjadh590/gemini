@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار پیشرفته شرح حال پزشکی</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Internal Stylesheet -->
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .font-fa { font-family: 'Vazirmatn', sans-serif; }
+        .font-en { font-family: 'Inter', sans-serif; }
+
+        .dark {
+            background-color: #111827;
+            color: #d1d5db;
+        }
+
+        .dark .bg-white { background-color: #1f2937; }
+        .dark .bg-gray-50 { background-color: #1f2937; }
+        .dark .bg-gray-100 { background-color: #374151; }
+        .dark .text-gray-900 { color: #f9fafb; }
+        .dark .text-gray-700 { color: #9ca3af; }
+        .dark .text-gray-600 { color: #d1d5db; }
+        .dark .text-gray-500 { color: #9ca3af; }
+        .dark .border-gray-300 { border-color: #4b5563; }
+        .dark .border-gray-200 { border-color: #4b5563; }
+
+        .dark input, .dark textarea, .dark select {
+            background-color: #374151;
+            color: #f9fafb;
+            border-color: #6b7280;
+        }
+
+        .dark input::placeholder, .dark textarea::placeholder { color: #9ca3af; }
+
+        /* --- Accordion Styles --- */
+        .accordion-header {
+            cursor: pointer;
+            user-select: none;
+            background: #f3f4f6;
+            transition: background 0.2s;
+        }
+        .accordion-header:hover {
+            background: #e5e7eb;
+        }
+        .dark .accordion-header {
+            background: #1e293b;
+        }
+        .dark .accordion-header:hover {
+            background: #334155;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+            padding: 0 1rem;
+            background: #f9fafb;
+        }
+        .accordion-content.open {
+            padding: 1rem;
+            background: #f9fafb;
+        }
+        .dark .accordion-content,
+        .dark .accordion-content.open {
+            background: #23272f;
+        }
+        
+        .accordion-chevron {
+            transition: transform 0.3s;
+        }
+        .accordion-chevron.rotate-180 {
+            transform: rotate(180deg);
+        }
+
+        .details-input {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #ai-questions-list ul {
+            list-style-type: decimal;
+            list-style-position: inside;
+            padding-right: 0.5rem;
+            direction: rtl;
+        }
+
+        html[dir="ltr"] #ai-questions-list ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+            direction: ltr;
+        }
+
+        #ai-questions-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-output h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .ai-output .plan-section h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .ai-output ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .ai-output li {
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dark .ai-output li {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .ddx-item {
+            border-right: 4px solid;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.375rem;
+        }
+        html[dir="ltr"] .ddx-item {
+            border-right: none;
+            border-left: 4px solid;
+        }
+
+        .ddx-item .probability {
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            color: white;
+        }
+
+        #language-modal {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        @media print {
+            body {
+                font-size: 10pt;
+            }
+            .lg\:col-span-1, #language-modal, header button {
+                display: none;
+            }
+            .lg\:col-span-2 {
+                width: 100%;
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            .bg-white {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Language Selection Modal -->
+    <div id="language-modal" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-2xl p-8 text-center max-w-sm mx-auto">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Select Language / زبان را انتخاب کنید</h2>
+            <div class="flex justify-center gap-4">
+                <button id="lang-en-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105">English</button>
+                <button id="lang-fa-btn" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">فارسی</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+            <div class="flex items-center gap-4">
+                <i class="fas fa-stethoscope text-4xl text-blue-500"></i>
+                <h1 id="app-title" class="text-2xl md:text-3xl font-bold text-gray-900" data-translate-key="appTitle"></h1>
+            </div>
+            <div id="header-buttons" class="flex items-center gap-3">
+                 <button id="print-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" data-translate-key="printTooltip" title="چاپ/ذخیره گزارش">
+                    <i class="fas fa-print text-xl"></i>
+                </button>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                    <i class="fas fa-moon text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Sections -->
+            <div id="main-form-container" class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+                <form id="main-form" class="space-y-8">
+                
+                    <!-- Patient Demographics -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2" data-translate-key="patientID"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="name" data-translate-key="namePlaceholder" class="p-2 border rounded w-full">
+                            <input type="text" id="family_name" data-translate-key="familyNamePlaceholder" class="p-2 border rounded w-full">
+                            <input type="number" id="age" data-translate-key="agePlaceholder" class="p-2 border rounded w-full">
+                            <select id="gender" class="p-2 border rounded w-full">
+                                <option value="" data-translate-key="genderSelect"></option>
+                                <option value="Male" data-translate-key="genderMale"></option>
+                                <option value="Female" data-translate-key="genderFemale"></option>
+                            </select>
+                            <select id="marital_status" class="p-2 border rounded w-full">
+                                <option value="" data-translate-key="maritalSelect"></option>
+                                <option value="Single" data-translate-key="maritalSingle"></option>
+                                <option value="Married" data-translate-key="maritalMarried"></option>
+                                <option value="Divorced" data-translate-key="maritalDivorced"></option>
+                                <option value="Widowed" data-translate-key="maritalWidowed"></option>
+                            </select>
+                            <input type="text" id="occupation" data-translate-key="occupationPlaceholder" class="p-2 border rounded w-full">
+                        </div>
+                    </section>
+
+                    <!-- Chief Complaint & HPI -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2" data-translate-key="ccHpiTitle"></h2>
+                        <div>
+                            <label class="font-semibold" data-translate-key="ccLabel"></label>
+                            <input type="text" id="cc" data-translate-key="ccPlaceholder" class="p-2 border rounded w-full mt-1">
+                        </div>
+                        <div class="mt-4">
+                            <label class="font-semibold" data-translate-key="hpiOpqrstLabel"></label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 mt-2 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                                <input type="text" id="opqrst_o" data-translate-key="opqrstO" class="p-2 border rounded w-full">
+                                <input type="text" id="opqrst_p" data-translate-key="opqrstP" class="p-2 border rounded w-full">
+                                <input type="text" id="opqrst_q" data-translate-key="opqrstQ" class="p-2 border rounded w-full">
+                                <input type="text" id="opqrst_r" data-translate-key="opqrstR" class="p-2 border rounded w-full">
+                                <input type="text" id="opqrst_s" data-translate-key="opqrstS" class="p-2 border rounded w-full">
+                                <input type="text" id="opqrst_t" data-translate-key="opqrstT" class="p-2 border rounded w-full">
+                            </div>
+                        </div>
+                         <div class="mt-4">
+                            <label class="font-semibold" data-translate-key="aiQuestionsLabel"></label>
+                            <div id="ai-questions-container" class="p-4 border rounded-lg mt-1 bg-blue-50 dark:bg-gray-800 min-h-[100px] text-gray-600">
+                                <div id="ai-questions-list" class="mb-4">
+                                    <span data-translate-key="aiQuestionsPlaceholder"></span>
+                                </div>
+                                <textarea id="ai-narrative-answer" rows="4" data-translate-key="aiNarrativePlaceholder" class="p-2 border rounded w-full hidden"></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Histories -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2" data-translate-key="historiesTitle"></h2>
+                        <div class="space-y-4">
+                            <textarea id="pmh" rows="3" data-translate-key="pmhPlaceholder" class="p-2 border rounded w-full"></textarea>
+                            <textarea id="fh" rows="2" data-translate-key="fhPlaceholder" class="p-2 border rounded w-full"></textarea>
+                            <textarea id="dh" rows="3" data-translate-key="dhPlaceholder" class="p-2 border rounded w-full"></textarea>
+                            <textarea id="sh" rows="2" data-translate-key="shPlaceholder" class="p-2 border rounded w-full"></textarea>
+                            <input type="text" id="ah" data-translate-key="ahPlaceholder" class="p-2 border rounded w-full">
+                        </div>
+                    </section>
+
+                    <!-- Review of Systems (ROS) -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2" data-translate-key="rosTitle"></h2>
+                        <div id="ros-accordion" class="space-y-2"></div>
+                    </section>
+
+                    <!-- Physical Exam (PhE) -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-4 border-b pb-2" data-translate-key="pheTitle"></h2>
+                        <div id="phe-accordion" class="space-y-2"></div>
+                    </section>
+
+                    <!-- AI Analysis -->
+                    <section class="text-center">
+                        <button id="generate-report-btn" type="button" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors text-lg w-full md:w-auto">
+                            <i class="fas fa-brain mr-2"></i>
+                            <span data-translate-key="generateReportBtn"></span>
+                        </button>
+                        <p id="loading-indicator" class="hidden mt-4 text-blue-600 dark:text-blue-400"><i class="fas fa-spinner fa-spin mr-2"></i><span data-translate-key="loadingIndicator"></span></p>
+                    </section>
+                </form>
+            </div>
+
+            <!-- Summary & AI Output Panel -->
+            <aside class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 border-b pb-2" data-translate-key="summaryTitle"></h3>
+                    <div id="summary-panel" class="space-y-3 text-gray-700">
+                        <p class="text-gray-500" data-translate-key="summaryPlaceholder"></p>
+                    </div>
+                    
+                    <hr class="my-6 border-gray-200">
+
+                    <h3 class="text-xl font-bold mb-4 text-gray-900 border-b pb-2" data-translate-key="aiAnalysisTitle"></h3>
+                    <div id="ai-output-panel" class="space-y-4 text-gray-700">
+                         <p class="text-gray-500" data-translate-key="aiPlaceholder"></p>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+    
+    <!-- Internal JavaScript -->
+    <script>
+        // --- DATA & TRANSLATIONS ---
+        const translations = {
+            fa: {
+                appTitle: "دستیار پیشرفته شرح حال پزشکی",
+                patientID: "۱. مشخصات بیمار",
+                namePlaceholder: "نام",
+                familyNamePlaceholder: "نام خانوادگی",
+                agePlaceholder: "سن",
+                genderSelect: "جنسیت",
+                genderMale: "مرد",
+                genderFemale: "زن",
+                maritalSelect: "وضعیت تاهل",
+                maritalSingle: "مجرد",
+                maritalMarried: "متاهل",
+                maritalDivorced: "مطلقه",
+                maritalWidowed: "بیوه",
+                occupationPlaceholder: "شغل",
+                ccHpiTitle: "۲. شکایت اصلی و تاریخچه بیماری فعلی",
+                ccLabel: "شکایت اصلی (CC)",
+                ccPlaceholder: "مثال: درد قفسه سینه از ۲ ساعت قبل",
+                hpiOpqrstLabel: "تاریخچه بیماری فعلی (بر اساس OPQRST)",
+                opqrstO: "O: Onset (شروع)",
+                opqrstP: "P: Palliating/Provoking (عوامل تشدید و تسکین دهنده)",
+                opqrstQ: "Q: Quality (کیفیت)",
+                opqrstR: "R: Radiation (انتشار)",
+                opqrstS: "S: Severity (شدت از ۱۰)",
+                opqrstT: "T: Timing (زمان‌بندی)",
+                aiQuestionsLabel: "سوالات تکمیلی پیشنهادی هوش مصنوعی",
+                aiQuestionsPlaceholder: "با وارد کردن شکایت اصلی، سوالات پیشنهادی در اینجا ظاهر می‌شود.",
+                aiNarrativePlaceholder: "خلاصه پاسخ بیمار به سوالات بالا و سایر نکات تکمیلی HPI را در اینجا وارد کنید...",
+                historiesTitle: "۳. سوابق پزشکی",
+                pmhPlaceholder: "سوابق بیماری‌های قبلی (PMH)...",
+                fhPlaceholder: "سابقه خانوادگی (FH)...",
+                dhPlaceholder: "سابقه دارویی (DH)...",
+                shPlaceholder: "سابقه اجتماعی (SH) - سیگار، الکل، شغل...",
+                ahPlaceholder: "سابقه حساسیت (AH)...",
+                rosTitle: "۴. مرور سیستم‌ها (ROS)",
+                pheTitle: "۵. معاینه بالینی (PhE)",
+                generateReportBtn: "تحلیل هوشمند و ایجاد گزارش",
+                loadingIndicator: "در حال تحلیل داده‌ها و ارتباط با هوش مصنوعی...",
+                summaryTitle: "خلاصه وضعیت بیمار",
+                summaryPlaceholder: "اطلاعات بیمار در اینجا نمایش داده می‌شود...",
+                aiAnalysisTitle: "نتایج تحلیل هوشمند",
+                aiPlaceholder: "پس از تکمیل اطلاعات و کلیک بر روی دکمه تحلیل، نتایج در اینجا نمایش داده می‌شود.",
+                printTooltip: "چاپ/ذخیره گزارش",
+                clearFormTooltip: "پاک کردن فرم",
+                problemListTitle: "لیست مشکلات",
+                ddxTitle: "تشخیص‌های افتراقی",
+                planTitle: "پلن پیشنهادی",
+                labsTitle: "آزمایشات",
+                imagingTitle: "تصویربرداری",
+                consultsTitle: "مشاوره‌ها و سایر اقدامات",
+                detailsPlaceholder: "جزئیات..."
+            },
+            en: {
+                appTitle: "Advanced Medical History Assistant",
+                patientID: "1. Patient Demographics",
+                namePlaceholder: "First Name",
+                familyNamePlaceholder: "Last Name",
+                agePlaceholder: "Age",
+                genderSelect: "Gender",
+                genderMale: "Male",
+                genderFemale: "Female",
+                maritalSelect: "Marital Status",
+                maritalSingle: "Single",
+                maritalMarried: "Married",
+                maritalDivorced: "Divorced",
+                maritalWidowed: "Widowed",
+                occupationPlaceholder: "Occupation",
+                ccHpiTitle: "2. Chief Complaint & HPI",
+                ccLabel: "Chief Complaint (CC)",
+                ccPlaceholder: "e.g., Chest pain for 2 hours",
+                hpiOpqrstLabel: "History of Present Illness (OPQRST)",
+                opqrstO: "O: Onset",
+                opqrstP: "P: Palliating/Provoking",
+                opqrstQ: "Q: Quality",
+                opqrstR: "R: Radiation",
+                opqrstS: "S: Severity (out of 10)",
+                opqrstT: "T: Timing",
+                aiQuestionsLabel: "AI Suggested Follow-up Questions",
+                aiQuestionsPlaceholder: "Enter a chief complaint to see suggested questions here.",
+                aiNarrativePlaceholder: "Enter the narrative summary of the patient's answers to the questions above and other HPI details here...",
+                historiesTitle: "3. Medical Histories",
+                pmhPlaceholder: "Past Medical History (PMH)...",
+                fhPlaceholder: "Family History (FH)...",
+                dhPlaceholder: "Drug History (DH)...",
+                shPlaceholder: "Social History (SH) - Smoking, alcohol, occupation...",
+                ahPlaceholder: "Allergy History (AH)...",
+                rosTitle: "4. Review of Systems (ROS)",
+                pheTitle: "5. Physical Exam (PhE)",
+                generateReportBtn: "Generate Smart Analysis & Report",
+                loadingIndicator: "Analyzing data and contacting AI...",
+                summaryTitle: "Patient Summary",
+                summaryPlaceholder: "Patient information will be displayed here...",
+                aiAnalysisTitle: "Smart Analysis Results",
+                aiPlaceholder: "After completing the form and clicking the analysis button, results will appear here.",
+                printTooltip: "Print/Save Report",
+                clearFormTooltip: "Clear Form",
+                problemListTitle: "Problem List",
+                ddxTitle: "Differential Diagnosis",
+                planTitle: "Recommended Plan",
+                labsTitle: "Lab Tests",
+                imagingTitle: "Imaging",
+                consultsTitle: "Consultations & Other",
+                detailsPlaceholder: "Details..."
+            }
+        };
+
+        const checklistData = {
+            ros: {
+                General: { fa: "عمومی", en: "General", items: { Fever: {fa:"تب", en:"Fever"}, Chills: {fa:"لرز", en:"Chills"}, Sweats: {fa:"تعریق", en:"Sweats"}, Fatigue: {fa:"خستگی", en:"Fatigue"}, WeightLoss: {fa:"کاهش وزن", en:"Weight Loss"}, WeightGain: {fa:"افزایش وزن", en:"Weight Gain"} } },
+                Skin: { fa: "پوست", en: "Skin", items: { Rash: {fa:"راش", en:"Rash"}, Itching: {fa:"خارش", en:"Itching"}, Jaundice: {fa:"زردی", en:"Jaundice"}, Lesions: {fa:"ضایعات", en:"Lesions"}, HairLoss: {fa:"ریزش مو", en:"Hair Loss"}, NailChanges: {fa:"تغییرات ناخن", en:"Nail Changes"} } },
+                HEENT: { fa: "سر، چشم، گوش، حلق، بینی", en: "HEENT", items: { Headache: {fa:"سردرد", en:"Headache"}, Dizziness: {fa:"سرگیجه", en:"Dizziness"}, VisionChange: {fa:"تاری دید", en:"Vision Change"}, EyePain: {fa:"درد چشم", en:"Eye Pain"}, HearingLoss: {fa:"کاهش شنوایی", en:"Hearing Loss"}, Tinnitus: {fa:"وزوز گوش", en:"Tinnitus"}, SoreThroat: {fa:"گلودرد", en:"Sore Throat"}, Hoarseness: {fa:"خشونت صدا", en:"Hoarseness"}, Epistaxis: {fa:"خون‌دماغ", en:"Epistaxis"} } },
+                Cardiovascular: { fa: "قلبی-عروقی", en: "Cardiovascular", items: { ChestPain: {fa:"درد قفسه سینه", en:"Chest Pain"}, Palpitations: {fa:"تپش قلب", en:"Palpitations"}, DOE: {fa:"تنگی نفس فعالیتی", en:"Dyspnea on Exertion"}, Orthopnea: {fa:"ارتوپنه", en:"Orthopnea"}, PND: {fa:"PND", en:"PND"}, Edema: {fa:"ادم", en:"Edema"}, Syncope: {fa:"سنکوپ", en:"Syncope"} } },
+                Respiratory: { fa: "تنفسی", en: "Respiratory", items: { Cough: {fa:"سرفه", en:"Cough"}, Sputum: {fa:"خلط", en:"Sputum"}, Hemoptysis: {fa:"هموپتزی", en:"Hemoptysis"}, Wheezing: {fa:"خس‌خس سینه", en:"Wheezing"}, SOB: {fa:"تنگی نفس", en:"Shortness of Breath"} } },
+                Gastrointestinal: { fa: "گوارشی", en: "Gastrointestinal", items: { Nausea: {fa:"تهوع", en:"Nausea"}, Vomiting: {fa:"استفراغ", en:"Vomiting"}, AbdominalPain: {fa:"درد شکم", en:"Abdominal Pain"}, Diarrhea: {fa:"اسهال", en:"Diarrhea"}, Constipation: {fa:"یبوست", en:"Constipation"}, Melena: {fa:"ملنا", en:"Melena"}, Hematochezia: {fa:"هماتوشزی", en:"Hematochezia"}, Dysphagia: {fa:"دیسفاژی", en:"Dysphagia"} } },
+                Genitourinary: { fa: "ادراری-تناسلی", en: "Genitourinary", items: { Dysuria: {fa:"دیزوری", en:"Dysuria"}, Hematuria: {fa:"هماچوری", en:"Hematuria"}, Frequency: {fa:"تکرر ادرار", en:"Frequency"}, Urgency: {fa:"فوریت ادرار", en:"Urgency"}, Nocturia: {fa:"ناکچوری", en:"Nocturia"}, Hesitancy: {fa:"Hesitancy", en:"Hesitancy"} } },
+                Musculoskeletal: { fa: "عضلانی-اسکلتی", en: "Musculoskeletal", items: { Arthralgia: {fa:"درد مفاصل", en:"Arthralgia"}, Myalgia: {fa:"درد عضلانی", en:"Myalgia"}, BackPain: {fa:"کمردرد", en:"Back Pain"}, JointSwelling: {fa:"تورم مفصل", en:"Joint Swelling"} } },
+                Neurological: { fa: "عصبی", en: "Neurological", items: { Seizure: {fa:"تشنج", en:"Seizure"}, FocalWeakness: {fa:"ضعف کانونی", en:"Focal Weakness"}, Numbness: {fa:"بی‌حسی", en:"Numbness"}, Paresthesia: {fa:"پارستزی", en:"Paresthesia"}, MemoryChange: {fa:"تغییر حافظه", en:"Memory Change"} } },
+                Psychiatric: { fa: "روانپزشکی", en: "Psychiatric", items: { Depression: {fa:"افسردگی", en:"Depression"}, Anxiety: {fa:"اضطراب", en:"Anxiety"}, Insomnia: {fa:"بی‌خوابی", en:"Insomnia"} } },
+                Endocrine: { fa: "غدد", en: "Endocrine", items: { HeatIntolerance: {fa:"عدم تحمل گرما", en:"Heat Intolerance"}, ColdIntolerance: {fa:"عدم تحمل سرما", en:"Cold Intolerance"}, Polyuria: {fa:"پلی‌اوری", en:"Polyuria"}, Polydipsia: {fa:"پلی‌دیپسی", en:"Polydipsia"} } },
+            },
+            phe: {
+                Vitals: { fa: "علائم حیاتی", en: "Vitals", items: { BP: {fa:"فشار خون", en:"Blood Pressure"}, HR: {fa:"ضربان قلب", en:"Heart Rate"}, RR: {fa:"تعداد تنفس", en:"Respiratory Rate"}, Temp: {fa:"دما", en:"Temperature"}, SpO2: {fa:"درصد اشباع اکسیژن", en:"Oxygen Saturation"} } },
+                General: { fa: "معاینه عمومی", en: "General Exam", items: { Distress: {fa:"دیسترس", en:"Distress"}, Cachexia: {fa:"کاشکسی", en:"Cachexia"}, Cyanosis: {fa:"سیانوز", en:"Cyanosis"}, Jaundice: {fa:"زردی", en:"Jaundice"}, Pallor: {fa:"رنگ‌پریدگی", en:"Pallor"} } },
+                HEENT: { fa: "معاینه سر و گردن", en: "HEENT Exam", items: { ElevatedJVP: {fa:"JVP برجسته", en:"Elevated JVP"}, Thyromegaly: {fa:"بزرگی تیروئید", en:"Thyromegaly"}, CervicalLAD: {fa:"لنفادنوپاتی گردنی", en:"Cervical LAD"}, ConjunctivalPallor: {fa:"رنگ‌پریدگی ملتحمه", en:"Conjunctival Pallor"} } },
+                Chest: { fa: "معاینه قفسه سینه", en: "Chest Exam", items: { DecreasedBreathSounds: {fa:"کاهش صدای تنفسی", en:"Decreased Breath Sounds"}, Rales: {fa:"رال", en:"Rales/Crackles"}, Rhonchi: {fa:"رونکای", en:"Rhonchi"}, Wheezing: {fa:"ویزینگ", en:"Wheezing"} } },
+                Cardiovascular: { fa: "معاینه قلبی-عروقی", en: "Cardiovascular Exam", items: { Murmur: {fa:"سوفل قلبی", en:"Cardiac Murmur"}, Gallop: {fa:"صدای اضافی قلب (S3/S4)", en:"Gallop (S3/S4)"}, WeakPulses: {fa:"نبض ضعیف", en:"Weak Pulses"}, PeripheralEdema: {fa:"ادم محیطی", en:"Peripheral Edema"} } },
+                Abdomen: { fa: "معاینه شکم", en: "Abdomen Exam", items: { Tenderness: {fa:"تندرنس", en:"Tenderness"}, Rebound: {fa:"ریباند تندرنس", en:"Rebound Tenderness"}, Guarding: {fa:"گاردینگ", en:"Guarding"}, Hepatomegaly: {fa:"هپاتومگالی", en:"Hepatomegaly"}, Splenomegaly: {fa:"اسپلنومگالی", en:"Splenomegaly"}, Ascites: {fa:"آسیت", en:"Ascites"} } },
+                Neurological: { fa: "معاینه عصبی", en: "Neurological Exam", items: { DecreasedLOC: {fa:"کاهش سطح هوشیاری", en:"Decreased LOC"}, FocalDeficit: {fa:"نقص عصبی کانونی", en:"Focal Neurological Deficit"}, Meningismus: {fa:"مننژیسم", en:"Meningismus"} } },
+            }
+        };
+
+        // --- STATE MANAGEMENT ---
+        let currentLang = 'fa';
+
+        // --- CORE FUNCTIONS ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('appLanguage', lang);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+            document.body.className = `bg-gray-50 ${lang === 'fa' ? 'font-fa' : 'font-en'}`;
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+            renderUI();
+            document.getElementById('language-modal').style.display = 'none';
+            loadDataFromLocalStorage();
+        }
+
+        function renderUI() {
+            try {
+                const elements = document.querySelectorAll('[data-translate-key]');
+                elements.forEach(el => {
+                    const key = el.getAttribute('data-translate-key');
+                    if (translations[currentLang][key]) {
+                        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                            el.placeholder = translations[currentLang][key];
+                        } else if (el.tagName === 'BUTTON' || el.hasAttribute('title')) {
+                             if(el.querySelector('span')) el.querySelector('span').textContent = translations[currentLang][key];
+                             else if(el.title) el.title = translations[currentLang][key];
+                             else el.textContent = translations[currentLang][key];
+                        }
+                        else {
+                            el.textContent = translations[currentLang][key];
+                        }
+                    }
+                });
+                
+                createAccordions('ros');
+                createAccordions('phe');
+            } catch (error) {
+                console.error("Error during UI rendering:", error);
+                alert("A critical error occurred while building the user interface. Please refresh the page.");
+            }
+        }
+
+        function createAccordions(type) {
+            const container = document.getElementById(`${type}-accordion`);
+            if (!container) return;
+            container.innerHTML = '';
+            const data = checklistData[type];
+            for (const category in data) {
+                const categoryData = data[category];
+                const accordion = document.createElement('div');
+                accordion.className = 'border border-gray-200 dark:border-gray-700 rounded-lg mb-2';
+                
+                const header = document.createElement('div');
+                header.className = 'accordion-header flex items-center justify-between p-3 rounded-t-lg';
+                header.innerHTML = `
+                    <h3 class="font-semibold">${categoryData[currentLang]}</h3>
+                    <div class="flex items-center gap-4">
+                        <label class="text-xs flex items-center gap-1 cursor-pointer" title="${currentLang === 'fa' ? 'علامت زدن همه موارد به عنوان مثبت' : 'Mark all as positive'}"><input type="checkbox" class="master-check" data-category="${category}" data-type="${type}" data-action="positive"> +</label>
+                        <label class="text-xs flex items-center gap-1 cursor-pointer" title="${currentLang === 'fa' ? 'علامت زدن همه موارد به عنوان منفی' : 'Mark all as negative'}"><input type="checkbox" class="master-check" data-category="${category}" data-type="${type}" data-action="negative"> -</label>
+                        <i class="fas fa-chevron-down accordion-chevron"></i>
+                    </div>
+                `;
+                
+                const content = document.createElement('div');
+                content.className = 'accordion-content';
+                content.style.maxHeight = '0px';
+
+                const list = document.createElement('div');
+                list.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3';
+                
+                for (const itemKey in categoryData.items) {
+                    const itemData = categoryData.items[itemKey];
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex flex-col';
+                    itemDiv.innerHTML = `
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" class="symptom-check mt-1 flex-shrink-0" data-category="${category}" data-item-key="${itemKey}" data-type="${type}">
+                            <span class="min-w-0">${itemData[currentLang]}</span>
+                        </label>
+                        <div class="details-container pr-6 mt-1"></div>
+                    `;
+                    list.appendChild(itemDiv);
+                }
+                
+                content.appendChild(list);
+                accordion.appendChild(header);
+                accordion.appendChild(content);
+
+                container.appendChild(accordion);
+
+                header.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('master-check') || e.target.parentElement.classList.contains('master-check')) return;
+                    const icon = header.querySelector('.accordion-chevron');
+                    const isOpen = content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180', isOpen);
+                    if (isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    } else {
+                        content.style.maxHeight = '0px';
+                    }
+                });
+            }
+        }
+
+        // --- LOCAL STORAGE & DATA HANDLING ---
+        function saveDataToLocalStorage() {
+            try {
+                const data = collectAllData(false);
+                localStorage.setItem('medicalAssistantData', JSON.stringify(data));
+            } catch (error) {
+                console.error("Failed to save data to localStorage:", error);
+            }
+        }
+
+        function loadDataFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('medicalAssistantData');
+                if (!savedData) return;
+
+                const data = JSON.parse(savedData);
+
+                ['name', 'family_name', 'age', 'gender', 'marital_status', 'occupation', 'cc', 'pmh', 'fh', 'dh', 'sh', 'ah', 'ai-narrative-answer'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id]) {
+                        el.value = data[id];
+                    }
+                });
+
+                if (data.opqrst) {
+                    ['o', 'p', 'q', 'r', 's', 't'].forEach(key => {
+                        const el = document.getElementById(`opqrst_${key}`);
+                        if (el && data.opqrst[key]) {
+                            el.value = data.opqrst[key];
+                        }
+                    });
+                }
+
+                ['ros', 'phe'].forEach(type => {
+                    if (data[type]) {
+                        for (const categoryKey in data[type]) {
+                            for (const itemKey in data[type][categoryKey]) {
+                                const checkbox = document.querySelector(`.symptom-check[data-type='${type}'][data-item-key='${itemKey}']`);
+                                if (checkbox) {
+                                    checkbox.checked = true;
+                                    const detailsContainer = checkbox.closest('label').nextElementSibling;
+                                    const input = document.createElement('input');
+                                    input.type = 'text';
+                                    input.placeholder = translations[currentLang].detailsPlaceholder;
+                                    input.className = 'details-input p-1 border rounded w-full text-sm mt-1 dark:bg-gray-700 dark:border-gray-600';
+                                    input.dataset.category = checkbox.dataset.category;
+                                    input.dataset.itemKey = itemKey;
+                                    input.dataset.type = type;
+                                    input.value = data[type][categoryKey][itemKey] === 'Positive' ? '' : data[type][categoryKey][itemKey];
+                                    detailsContainer.appendChild(input);
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to load data from localStorage:", error);
+                localStorage.removeItem('medicalAssistantData');
+            }
+        }
+
+        function clearForm() {
+            if (confirm(currentLang === 'fa' ? 'آیا از پاک کردن تمام اطلاعات فرم مطمئن هستید؟' : 'Are you sure you want to clear the entire form?')) {
+                document.getElementById('main-form').reset();
+                document.querySelectorAll('.details-container').forEach(c => c.innerHTML = '');
+                
+                const aiQuestionsList = document.getElementById('ai-questions-list');
+                aiQuestionsList.innerHTML = `<span data-translate-key="aiQuestionsPlaceholder"></span>`;
+                document.getElementById('ai-narrative-answer').classList.add('hidden');
+
+                document.getElementById('ai-output-panel').innerHTML = `<p class="text-gray-500" data-translate-key="aiPlaceholder"></p>`;
+                localStorage.removeItem('medicalAssistantData');
+                renderUI();
+            }
+        }
+
+        // --- EVENT HANDLING ---
+        function setupEventListeners() {
+            document.getElementById('main-form-container').addEventListener('change', (e) => {
+                if (e.target.classList.contains('symptom-check')) {
+                    const detailsContainer = e.target.closest('label').nextElementSibling;
+                    if (e.target.checked) {
+                        // FIX: Prevent creating duplicate input fields
+                        if (!detailsContainer.querySelector('input')) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.placeholder = translations[currentLang].detailsPlaceholder;
+                            input.className = 'details-input p-1 border rounded w-full text-sm mt-1 dark:bg-gray-700 dark:border-gray-600';
+                            input.dataset.category = e.target.dataset.category;
+                            input.dataset.itemKey = e.target.dataset.itemKey;
+                            input.dataset.type = e.target.dataset.type;
+                            detailsContainer.appendChild(input);
+                        }
+                    } else {
+                        detailsContainer.innerHTML = '';
+                    }
+                } else if (e.target.classList.contains('master-check')) {
+                    const { category, type, action } = e.target.dataset;
+                    const isPositive = action === 'positive';
+                    const checkboxes = document.querySelectorAll(`.symptom-check[data-category='${category}'][data-type='${type}']`);
+                    checkboxes.forEach(cb => {
+                        if (cb.checked !== isPositive) {
+                           cb.checked = isPositive;
+                           cb.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    });
+                    e.target.checked = false;
+                }
+                saveDataToLocalStorage();
+            });
+
+            document.getElementById('main-form').addEventListener('input', saveDataToLocalStorage);
+
+            let debounceTimer;
+            document.getElementById('cc').addEventListener('input', e => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    e.target.dispatchEvent(new CustomEvent('debounce'));
+                }, 1500);
+            });
+
+            document.getElementById('cc').addEventListener('debounce', async (e) => {
+                const cc = e.target.value;
+                const questionsList = document.getElementById('ai-questions-list');
+                const narrativeBox = document.getElementById('ai-narrative-answer');
+                
+                if (cc.length < 5) {
+                    questionsList.innerHTML = `<span data-translate-key="aiQuestionsPlaceholder"></span>`;
+                    narrativeBox.classList.add('hidden');
+                    renderUI(); // Only call renderUI to reset the placeholder text
+                    return;
+                };
+
+                questionsList.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${currentLang === 'fa' ? 'در حال تولید سوالات...' : 'Generating questions...'}`;
+                narrativeBox.classList.remove('hidden');
+                
+                try {
+                    const questions = await getAISuggestedQuestions(cc);
+                    renderAIQuestions(questions);
+                } catch (error) {
+                    console.error("Error fetching AI questions:", error);
+                    questionsList.textContent = currentLang === 'fa' ? 'خطا در دریافت سوالات.' : 'Error fetching questions.';
+                }
+            });
+
+            document.getElementById('generate-report-btn').addEventListener('click', async () => {
+                const data = collectAllData(true);
+                const loadingIndicator = document.getElementById('loading-indicator');
+                loadingIndicator.classList.remove('hidden');
+                
+                try {
+                    const responseText = await getAIFullAnalysis(data);
+                    const aiResponse = JSON.parse(responseText);
+                    displayAIOutput(aiResponse);
+                } catch (error) {
+                    console.error("Error fetching AI analysis:", error);
+                    document.getElementById('ai-output-panel').innerHTML = `<p class="text-red-500">${currentLang === 'fa' ? 'خطا در ارتباط با سرویس هوش مصنوعی.' : 'Error contacting AI service.'} <br><small>${error.message}</small></p>`;
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderAIQuestions(questions) {
+            const questionsList = document.getElementById('ai-questions-list');
+            
+            questionsList.innerHTML = '';
+            if (questions && questions.length > 0) {
+                const ul = document.createElement('ul');
+                questions.forEach(q => {
+                    const li = document.createElement('li');
+                    li.textContent = q;
+                    ul.appendChild(li);
+                });
+                questionsList.appendChild(ul);
+            } else {
+                // FIX: Do not call renderUI() here, just reset the placeholder
+                questionsList.innerHTML = `<span data-translate-key="aiQuestionsPlaceholder"></span>`;
+                const placeholderEl = questionsList.querySelector('span');
+                if (placeholderEl) {
+                    placeholderEl.textContent = translations[currentLang][placeholderEl.dataset.translateKey];
+                }
+            }
+        }
+
+        // --- AI & REPORTING ---
+        async function getAISuggestedQuestions(chiefComplaint) {
+            const prompt = `You are a senior attending physician AI, guiding an internal medicine resident. The resident has provided the following chief complaint: "${chiefComplaint}".
+            Your task is to generate 5-7 high-yield follow-up questions to ask the patient.
+            Prioritize questions that:
+            1. Rule out immediate life-threatening conditions (red flags).
+            2. Characterize the chief complaint fully (using OPQRST if not already obvious).
+            3. Explore key associated symptoms for the most likely differential diagnoses.
+            4. Inquire about relevant risk factors.
+            Respond ONLY with a JSON array of strings. The questions must be in ${currentLang === 'fa' ? 'Persian' : 'English'}.`;
+            
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                const result = await response.json();
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return JSON.parse(result.candidates[0].content.parts[0].text);
+                }
+            } catch (error) {
+                console.error("AI Question Generation Error:", error);
+                return currentLang === 'fa' ? ["خطا در تولید سوالات. لطفا HPI را به صورت دستی کامل کنید."] : ["Error generating questions. Please complete HPI manually."];
+            }
+            return [];
+        }
+
+        function collectAllData(includeAIResponses) {
+            const data = {};
+            ['name', 'family_name', 'age', 'gender', 'marital_status', 'occupation', 'cc', 'pmh', 'fh', 'dh', 'sh', 'ah'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) data[id] = el.value;
+            });
+            data.opqrst = {};
+            ['o', 'p', 'q', 'r', 's', 't'].forEach(key => {
+                const el = document.getElementById(`opqrst_${key}`);
+                if(el) data.opqrst[key] = el.value;
+            });
+            data.ros = collectChecklistData('ros');
+            data.phe = collectChecklistData('phe');
+
+            if (includeAIResponses) {
+                const narrativeEl = document.getElementById('ai-narrative-answer');
+                data.hpi_narrative_follow_up = narrativeEl ? narrativeEl.value : '';
+            }
+            return data;
+        }
+
+        function collectChecklistData(type) {
+            const collectedData = {};
+            const checkedItems = document.querySelectorAll(`.symptom-check[data-type='${type}']:checked`);
+            checkedItems.forEach(item => {
+                const { category, itemKey } = item.dataset;
+                if (!collectedData[category]) {
+                    collectedData[category] = {};
+                }
+                const detailsInput = document.querySelector(`.details-input[data-type='${type}'][data-category='${category}'][data-item-key='${itemKey}']`);
+                collectedData[category][itemKey] = detailsInput ? detailsInput.value || 'Positive' : 'Positive';
+            });
+            return collectedData;
+        }
+
+        async function getAIFullAnalysis(data) {
+            const prompt = `
+            You are a top-tier medical diagnostic AI assistant, acting as an attending physician guiding an internal medicine resident. Your analysis must be professional, evidence-based, and highly specialized.
+            Analyze the following comprehensive patient data. The resident has provided a standard history and physical, and has also added a narrative summary of their follow-up questioning.
+
+            Patient Data:
+            - Demographics: Age: ${data.age}, Gender: ${data.gender}, Marital Status: ${data.marital_status}, Occupation: ${data.occupation}
+            - Chief Complaint: ${data.cc}
+            - HPI (OPQRST): ${JSON.stringify(data.opqrst)}
+            - HPI Narrative Follow-up: ${data.hpi_narrative_follow_up}
+            - PMH: ${data.pmh}
+            - FH: ${data.fh}
+            - DH: ${data.dh}
+            - SH: ${data.sh}
+            - AH: ${data.ah}
+            - Review of Systems (Positive Findings): ${JSON.stringify(data.ros)}
+            - Physical Exam (Positive Findings): ${JSON.stringify(data.phe)}
+
+            Based on this complete picture, provide a JSON object with the following structure:
+            1.  "problemList": An array of concise medical problems.
+            2.  "differentialDiagnosis": An array of objects, each with:
+                - "diagnosis": The name of the condition.
+                - "probability": A string representing the estimated probability (e.g., "40%").
+                - "reasoning": A concise, expert-level explanation for why this diagnosis is considered, integrating all provided data points.
+            3.  "recommendedPlan": An object with three keys:
+                - "labTests": An array of suggested laboratory tests.
+                - "imaging": An array of suggested imaging studies.
+                - "consultationsAndOther": An array of suggested consultations or other diagnostic procedures (e.g., ECG, specific physical maneuvers).
+
+            The language of the entire JSON output must be ${currentLang === 'fa' ? 'Persian' : 'English'}.
+                `;
+            
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            
+            const result = await response.json();
+            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error("Invalid response structure from AI.");
+            }
+        }
+
+        function displayAIOutput(data) {
+            const panel = document.getElementById('ai-output-panel');
+            panel.innerHTML = '';
+            const langData = translations[currentLang];
+
+            if (data.problemList) {
+                panel.innerHTML += `<h4><i class="fas fa-list-check mr-2"></i>${langData.problemListTitle}</h4><ul>${data.problemList.map(item => `<li>${item}</li>`).join('')}</ul>`;
+            }
+
+            if (data.differentialDiagnosis) {
+                panel.innerHTML += `<h4 class="mt-6"><i class="fas fa-lightbulb mr-2"></i>${langData.ddxTitle}</h4>`;
+                data.differentialDiagnosis.sort((a, b) => parseInt(b.probability) - parseInt(a.probability)).forEach(ddx => {
+                    const prob = parseInt(ddx.probability);
+                    let colorClass = 'bg-blue-500';
+                    let borderColor = 'var(--primary-color)';
+                    if (prob > 50) { colorClass = 'bg-red-500'; borderColor = 'var(--danger-color)'; }
+                    else if (prob > 20) { colorClass = 'bg-yellow-500'; borderColor = 'var(--warning-color)'; }
+
+                    panel.innerHTML += `
+                        <div class="ddx-item" style="border-right-color: ${borderColor};">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-lg">${ddx.diagnosis}</strong>
+                                <span class="probability ${colorClass}">${ddx.probability}</span>
+                            </div>
+                            <p class="text-sm mt-2 text-gray-600">${ddx.reasoning}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            if (data.recommendedPlan) {
+                panel.innerHTML += `<h4 class="mt-6"><i class="fas fa-clipboard-list mr-2"></i>${langData.planTitle}</h4>`;
+                const plan = data.recommendedPlan;
+                const planHTML = `
+                    <div class="plan-section">
+                        ${plan.labTests?.length > 0 ? `<h5><i class="fas fa-vial mr-2"></i>${langData.labsTitle}</h5><ul>${plan.labTests.map(item => `<li>${item}</li>`).join('')}</ul>` : ''}
+                        ${plan.imaging?.length > 0 ? `<h5 class="mt-4"><i class="fas fa-x-ray mr-2"></i>${langData.imagingTitle}</h5><ul>${plan.imaging.map(item => `<li>${item}</li>`).join('')}</ul>` : ''}
+                        ${plan.consultationsAndOther?.length > 0 ? `<h5 class="mt-4"><i class="fas fa-user-md mr-2"></i>${langData.consultsTitle}</h5><ul>${plan.consultationsAndOther.map(item => `<li>${item}</li>`).join('')}</ul>` : ''}
+                    </div>
+                `;
+                panel.innerHTML += planHTML;
+            }
+        }
+
+        // --- INITIALIZATION ---
+        function init() {
+            try {
+                // Setup static event listeners first
+                document.getElementById('lang-en-btn').addEventListener('click', () => setLanguage('en'));
+                document.getElementById('lang-fa-btn').addEventListener('click', () => setLanguage('fa'));
+                
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', () => {
+                        document.body.classList.toggle('dark');
+                        const isDark = document.body.classList.contains('dark');
+                        themeToggle.querySelector('i').classList.toggle('fa-sun', isDark);
+                        themeToggle.querySelector('i').classList.toggle('fa-moon', !isDark);
+                        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    });
+                }
+
+                const printBtn = document.getElementById('print-btn');
+                if (printBtn) {
+                    printBtn.addEventListener('click', () => window.print());
+                }
+                
+                if (!document.getElementById('clear-btn')) {
+                    const clearBtn = document.createElement('button');
+                    clearBtn.id = 'clear-btn';
+                    clearBtn.className = 'p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600';
+                    clearBtn.innerHTML = '<i class="fas fa-trash text-xl"></i>';
+                    clearBtn.setAttribute('data-translate-key', 'clearFormTooltip');
+                    document.getElementById('header-buttons').prepend(clearBtn);
+                    clearBtn.addEventListener('click', clearForm);
+                }
+
+                // Setup dynamic event listeners
+                setupEventListeners();
+
+                // Load initial state
+                const savedLang = localStorage.getItem('appLanguage');
+                if (savedLang) {
+                    setLanguage(savedLang);
+                } else {
+                    renderUI(); // Render default UI if no language is saved
+                }
+
+                if (localStorage.getItem('theme') === 'dark' && themeToggle) {
+                    document.body.classList.add('dark');
+                    themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                }
+            } catch (error) {
+                console.error("A critical error occurred during initialization:", error);
+                alert("An error occurred while setting up the application. Please refresh the page.");
+            }
+        }
+
+        // Start the application once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
