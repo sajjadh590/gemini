@@ -504,8 +504,11 @@
                     }
                 });
                 
-                createAccordions('ros');
-                createAccordions('phe');
+                setTimeout(() => {
+                    createAccordions('ros');
+                    createAccordions('phe');
+                }, 50);
+
             } catch (error) {
                 console.error("Error during UI rendering:", error);
                 alert("A critical error occurred while building the user interface. Please refresh the page.");
@@ -538,7 +541,7 @@
                 content.style.maxHeight = '0px';
 
                 const list = document.createElement('div');
-                list.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3';
+                list.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3 p-4';
                 
                 for (const itemKey in categoryData.items) {
                     const itemData = categoryData.items[itemKey];
@@ -561,10 +564,12 @@
                 container.appendChild(accordion);
 
                 header.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('master-check') || e.target.parentElement.classList.contains('master-check')) return;
+                    if (e.target.tagName === 'INPUT') return;
+                    
                     const icon = header.querySelector('.accordion-chevron');
                     const isOpen = content.classList.toggle('open');
                     icon.classList.toggle('rotate-180', isOpen);
+                    
                     if (isOpen) {
                         content.style.maxHeight = content.scrollHeight + 'px';
                     } else {
@@ -656,7 +661,6 @@
                 if (e.target.classList.contains('symptom-check')) {
                     const detailsContainer = e.target.closest('label').nextElementSibling;
                     if (e.target.checked) {
-                        // FIX: Prevent creating duplicate input fields
                         if (!detailsContainer.querySelector('input')) {
                             const input = document.createElement('input');
                             input.type = 'text';
@@ -670,6 +674,13 @@
                     } else {
                         detailsContainer.innerHTML = '';
                     }
+
+                    // Recalculate height of open accordion
+                    const openContent = e.target.closest('.accordion-content.open');
+                    if (openContent) {
+                        openContent.style.maxHeight = openContent.scrollHeight + 'px';
+                    }
+
                 } else if (e.target.classList.contains('master-check')) {
                     const { category, type, action } = e.target.dataset;
                     const isPositive = action === 'positive';
@@ -703,7 +714,8 @@
                 if (cc.length < 5) {
                     questionsList.innerHTML = `<span data-translate-key="aiQuestionsPlaceholder"></span>`;
                     narrativeBox.classList.add('hidden');
-                    renderUI(); // Only call renderUI to reset the placeholder text
+                    const placeholderEl = questionsList.querySelector('span');
+                    if(placeholderEl) placeholderEl.textContent = translations[currentLang].aiQuestionsPlaceholder;
                     return;
                 };
 
@@ -750,7 +762,6 @@
                 });
                 questionsList.appendChild(ul);
             } else {
-                // FIX: Do not call renderUI() here, just reset the placeholder
                 questionsList.innerHTML = `<span data-translate-key="aiQuestionsPlaceholder"></span>`;
                 const placeholderEl = questionsList.querySelector('span');
                 if (placeholderEl) {
